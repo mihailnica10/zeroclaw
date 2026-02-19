@@ -32,6 +32,8 @@ Last refreshed: **February 18, 2026**.
 - [custom-providers.md](custom-providers.md)
 - [zai-glm-setup.md](zai-glm-setup.md)
 - [langgraph-integration.md](langgraph-integration.md)
+- [mcp-cli-reference.md](mcp-cli-reference.md)
+- [mcp-import-guide.md](mcp-import-guide.md)
 
 ### 3) Operations & Deployment
 

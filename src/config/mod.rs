@@ -1,4 +1,5 @@
 pub mod schema;
+pub mod mcp_import;
 
 #[allow(unused_imports)]
 pub use schema::{
@@ -8,12 +9,12 @@ pub use schema::{
     ChannelsConfig, ClassificationRule, ComposioConfig, Config, CostConfig, CronConfig,
     DelegateAgentConfig, DiscordConfig, DockerRuntimeConfig, GatewayConfig, HardwareConfig,
     HardwareTransport, HeartbeatConfig, HttpRequestConfig, IMessageConfig, IdentityConfig,
-    LarkConfig, MatrixConfig, MemoryConfig, ModelRouteConfig, ObservabilityConfig,
-    PeripheralBoardConfig, PeripheralsConfig, ProxyConfig, ProxyScope, QueryClassificationConfig,
-    ReliabilityConfig, ResourceLimitsConfig, RuntimeConfig, SandboxBackend, SandboxConfig,
-    SchedulerConfig, SecretsConfig, SecurityConfig, SlackConfig, StorageConfig,
-    StorageProviderConfig, StorageProviderSection, StreamMode, TelegramConfig, TunnelConfig,
-    WebSearchConfig, WebhookConfig,
+    LarkConfig, MatrixConfig, McpConfig, McpRetryPolicy, McpServerConfig, MemoryConfig,
+    ModelRouteConfig, ObservabilityConfig, PeripheralBoardConfig, PeripheralsConfig, ProxyConfig,
+    ProxyScope, QueryClassificationConfig, ReliabilityConfig, ResourceLimitsConfig, RuntimeConfig,
+    SandboxBackend, SandboxConfig, SchedulerConfig, SecretsConfig, SecurityConfig, SlackConfig,
+    StorageConfig, StorageProviderConfig, StorageProviderSection, StreamMode, TelegramConfig,
+    TunnelConfig, WebSearchConfig, WebhookConfig,
 };
 
 #[cfg(test)]

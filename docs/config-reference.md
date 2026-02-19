@@ -59,6 +59,73 @@ Examples:
 
 See detailed channel matrix and allowlist behavior in [channels-reference.md](channels-reference.md).
 
+## `[mcp]` (Model Context Protocol)
+
+MCP enables ZeroClaw to dynamically discover and use tools from external MCP servers.
+
+| Key | Default | Purpose |
+|---|---|---|
+| `enabled` | `false` | Enable MCP integration |
+| `default_timeout_secs` | `30` | Timeout for MCP tool execution |
+| `max_connections` | `10` | Maximum concurrent MCP server connections |
+
+### MCP Server Configuration
+
+Each MCP server is configured as a separate entry:
+
+```toml
+[[mcp.servers]]
+name = "filesystem"
+transport_type = "stdio"
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/workspace"]
+timeout_secs = 30
+```
+
+| Server Key | Purpose |
+|---|---|
+| `name` | Unique identifier (used for tool namespacing) |
+| `transport_type` | `"stdio"` (local subprocess) or `"http"` (remote server) |
+| `command` | Command to launch stdio MCP server |
+| `args` | Arguments for the command |
+| `env` | Environment variables (optional) |
+| `work_dir` | Working directory for subprocess (optional) |
+| `url` | URL for HTTP transport |
+| `auth_token` | Bearer token for HTTP transport (optional) |
+| `api_key` | API key (encrypted by secret store, optional) |
+| `timeout_secs` | Request timeout |
+| `retry_policy` | Retry configuration (optional) |
+
+### Example Configurations
+
+**Filesystem MCP server (stdio):**
+```toml
+[[mcp.servers]]
+name = "filesystem"
+transport_type = "stdio"
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/workspace"]
+```
+
+**GitHub MCP server (stdio):**
+```toml
+[[mcp.servers]]
+name = "github"
+transport_type = "stdio"
+command = "uvx"
+args = ["mcp-server-github"]
+api_key = "github_pat_..."  # Will be encrypted
+```
+
+**Remote HTTP MCP server:**
+```toml
+[[mcp.servers]]
+name = "remote-service"
+transport_type = "http"
+url = "https://mcp.example.com/sse"
+auth_token = "bearer_token_..."
+```
+
 ## Security-Relevant Defaults
 
 - deny-by-default channel allowlists (`[]` means deny all)

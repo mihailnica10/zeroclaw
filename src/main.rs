@@ -58,6 +58,7 @@ mod identity;
 mod integrations;
 mod memory;
 mod migration;
+mod mcp;
 mod observability;
 mod onboard;
 mod peripherals;
@@ -241,6 +242,12 @@ enum Commands {
     Peripheral {
         #[command(subcommand)]
         peripheral_command: zeroclaw::PeripheralCommands,
+    },
+
+    /// Manage MCP (Model Context Protocol) servers
+    MCP {
+        #[command(subcommand)]
+        mcp_command: mcp::MCPCommands,
     },
 }
 
@@ -749,6 +756,8 @@ async fn main() -> Result<()> {
         Commands::Peripheral { peripheral_command } => {
             peripherals::handle_command(peripheral_command.clone(), &config)
         }
+
+        Commands::MCP { mcp_command } => mcp::handle_command(mcp_command, &mut config),
     }
 }
 

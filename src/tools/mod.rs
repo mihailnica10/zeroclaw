@@ -16,6 +16,7 @@ pub mod hardware_memory_map;
 pub mod hardware_memory_read;
 pub mod http_request;
 pub mod image_info;
+pub mod mcp;
 pub mod memory_forget;
 pub mod memory_recall;
 pub mod memory_store;
@@ -46,6 +47,7 @@ pub use hardware_memory_map::HardwareMemoryMapTool;
 pub use hardware_memory_read::HardwareMemoryReadTool;
 pub use http_request::HttpRequestTool;
 pub use image_info::ImageInfoTool;
+pub use mcp::McpRegistry;
 pub use memory_forget::MemoryForgetTool;
 pub use memory_recall::MemoryRecallTool;
 pub use memory_store::MemoryStoreTool;
@@ -233,6 +235,35 @@ pub fn all_tools_with_runtime(
             security.clone(),
         )));
     }
+
+    // Discover MCP tools from configured servers
+    // Note: MCP discovery requires async; we'll handle it carefully to avoid runtime conflicts
+    let mcp_tools = if let Ok(handle) = tokio::runtime::Handle::try_current() {
+        // Check if runtime allows blocking
+        if handle.runtime_flavor() == tokio::runtime::RuntimeFlavor::MultiThread {
+            let config = root_config.mcp.clone();
+            let sec = security.clone();
+            let path = root_config.config_path.clone();
+
+            // Use block_on in multi-threaded runtime (safe)
+            match handle.block_on(mcp::discover_tools(&config, &sec, &path)) {
+                Ok(t) => t,
+                Err(e) => {
+                    tracing::warn!("Failed to discover MCP tools: {}", e);
+                    Vec::new()
+                }
+            }
+        } else {
+            // Current thread runtime - skip MCP discovery to avoid deadlock
+            tracing::debug!("Skipping MCP tool discovery in current-thread runtime");
+            Vec::new()
+        }
+    } else {
+        // No runtime available
+        tracing::warn!("No tokio runtime available for MCP tool discovery");
+        Vec::new()
+    };
+    tools.extend(mcp_tools);
 
     tools
 }

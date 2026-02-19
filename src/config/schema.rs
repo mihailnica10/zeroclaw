@@ -111,6 +111,9 @@ pub struct Config {
     pub composio: ComposioConfig,
 
     #[serde(default)]
+    pub mcp: McpConfig,
+
+    #[serde(default)]
     pub secrets: SecretsConfig,
 
     #[serde(default)]
@@ -620,6 +623,105 @@ impl Default for ComposioConfig {
             enabled: false,
             api_key: None,
             entity_id: default_entity_id(),
+        }
+    }
+}
+
+// ── MCP (Model Context Protocol) ─────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct McpConfig {
+    /// Enable MCP integration for external tool servers
+    #[serde(default)]
+    pub enabled: bool,
+    /// Default timeout for MCP tool execution (seconds)
+    #[serde(default = "default_mcp_timeout")]
+    pub default_timeout_secs: u64,
+    /// Maximum number of concurrent MCP server connections
+    #[serde(default = "default_mcp_max_connections")]
+    pub max_connections: usize,
+    /// MCP server configurations
+    #[serde(default)]
+    pub servers: Vec<McpServerConfig>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct McpServerConfig {
+    /// Unique identifier for this MCP server (used for tool naming)
+    pub name: String,
+    /// Transport type: "stdio" (subprocess) or "http" (HTTP/SSE)
+    pub transport_type: String,
+    /// For stdio: command to launch MCP server
+    #[serde(default)]
+    pub command: String,
+    /// For stdio: arguments to pass to command
+    #[serde(default)]
+    pub args: Vec<String>,
+    /// For stdio: environment variables for subprocess
+    #[serde(default)]
+    pub env: std::collections::HashMap<String, String>,
+    /// For stdio: working directory for subprocess
+    #[serde(default)]
+    pub work_dir: Option<String>,
+    /// For http: URL of MCP server endpoint
+    #[serde(default)]
+    pub url: String,
+    /// For http: optional bearer token for authentication
+    #[serde(default)]
+    pub auth_token: Option<String>,
+    /// Timeout for individual tool calls (seconds)
+    #[serde(default = "default_mcp_timeout")]
+    pub timeout_secs: u64,
+    /// Retry policy for connection failures
+    #[serde(default)]
+    pub retry_policy: Option<McpRetryPolicy>,
+    /// Optional API key (passed via env for stdio, header for http)
+    #[serde(default)]
+    pub api_key: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct McpRetryPolicy {
+    /// Maximum number of retry attempts
+    #[serde(default = "default_mcp_max_attempts")]
+    pub max_attempts: u32,
+    /// Backoff delay between retries (milliseconds)
+    #[serde(default = "default_mcp_backoff_ms")]
+    pub backoff_ms: u64,
+}
+
+fn default_mcp_timeout() -> u64 {
+    30
+}
+
+fn default_mcp_max_connections() -> usize {
+    10
+}
+
+fn default_mcp_max_attempts() -> u32 {
+    3
+}
+
+fn default_mcp_backoff_ms() -> u64 {
+    1000
+}
+
+impl Default for McpConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            default_timeout_secs: default_mcp_timeout(),
+            max_connections: default_mcp_max_connections(),
+            servers: Vec::new(),
+        }
+    }
+}
+
+impl Default for McpRetryPolicy {
+    fn default() -> Self {
+        Self {
+            max_attempts: default_mcp_max_attempts(),
+            backoff_ms: default_mcp_backoff_ms(),
         }
     }
 }
@@ -2419,6 +2521,7 @@ impl Default for Config {
             tunnel: TunnelConfig::default(),
             gateway: GatewayConfig::default(),
             composio: ComposioConfig::default(),
+            mcp: McpConfig::default(),
             secrets: SecretsConfig::default(),
             browser: BrowserConfig::default(),
             http_request: HttpRequestConfig::default(),
@@ -3248,6 +3351,7 @@ default_temperature = 0.7
             tunnel: TunnelConfig::default(),
             gateway: GatewayConfig::default(),
             composio: ComposioConfig::default(),
+            mcp: McpConfig::default(),
             secrets: SecretsConfig::default(),
             browser: BrowserConfig::default(),
             http_request: HttpRequestConfig::default(),
@@ -3388,6 +3492,7 @@ tool_dispatcher = "xml"
             tunnel: TunnelConfig::default(),
             gateway: GatewayConfig::default(),
             composio: ComposioConfig::default(),
+            mcp: McpConfig::default(),
             secrets: SecretsConfig::default(),
             browser: BrowserConfig::default(),
             http_request: HttpRequestConfig::default(),
